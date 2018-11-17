@@ -5,13 +5,17 @@
 #include "Client.h"
 #include <iostream>
 
-void main()
+int main()
 {
 	Net::Init();
 
 	Client client;
 
-	client.Connect("127.0.0.1", 1111);
+	bool result = client.Connect("127.0.0.1", 1111);
+	if (!result)
+	{
+		return 1;
+	}
 
 	std::string buffer;
 	bool shouldContinue = true;
@@ -24,4 +28,6 @@ void main()
 	std::cerr << "Lost connection to server." << std::endl;
 	
 	system("pause");
+
+	return 1;
 }

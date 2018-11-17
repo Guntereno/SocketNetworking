@@ -18,8 +18,8 @@ private:
 	bool ReceiveMessage();
 	void ServerRecieveThread();
 
-	SOCKET gConnection;
-	std::mutex gOutputMutex;
+	SOCKET m_connection;
+	std::mutex m_outputMutex;
 	std::thread m_recieveThread;
 };
 
