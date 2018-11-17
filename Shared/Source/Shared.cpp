@@ -14,14 +14,37 @@ void Init()
 	}
 }
 
-bool SendHeader(SOCKET socket, PacketType packetType)
+static bool SendAll(SOCKET socket, const char* pBuffer, size_t numBytes)
 {
-	int result;
-	result = send(socket, (const char*)(&packetType), sizeof(packetType), 0);
-	if (result == SOCKET_ERROR)
-		return false;
+	size_t bytesSent = 0;
+	while (bytesSent < numBytes)
+	{
+		int result = send(
+			socket,
+			(pBuffer + bytesSent),
+			numBytes - bytesSent,
+			0);
+
+		if (result == SOCKET_ERROR)
+		{
+			return false;
+		}
+
+		bytesSent += result;
+	}
 
 	return true;
+}
+
+bool SendHeader(SOCKET socket, PacketType packetType)
+{
+	return SendAll(socket, (const char*)(&packetType), sizeof(packetType));
+}
+
+bool SendU32(SOCKET socket, u32 num)
+{
+	num = htonl(num);
+	return SendAll(socket, (const char*)(&num), sizeof(num));
 }
 
 bool SendBuffer(SOCKET socket, const char* pBuffer, size_t size)
@@ -29,13 +52,14 @@ bool SendBuffer(SOCKET socket, const char* pBuffer, size_t size)
 	if (size == 0)
 		return false;
 
-	int result;
-	result = send(socket, (const char*)(&size), sizeof(size), 0);
-	if (result == SOCKET_ERROR)
+	bool result;
+
+	result = SendU32(socket, size);
+	if (!result)
 		return false;
 
-	send(socket, pBuffer, size, 0);
-	if (result == SOCKET_ERROR)
+	result = SendAll(socket, pBuffer, size);
+	if (!result)
 		return false;
 
 	return true;
@@ -60,30 +84,62 @@ bool SendBuffer(SOCKET socket, const std::string& message)
 	return SendBuffer(socket, message.c_str(), message.length());
 }
 
-bool ReceiveHeader(SOCKET socket, PacketType& o_header)
+static bool ReceiveAll(SOCKET socket, char* pBuffer, size_t numBytes)
 {
-	int result;
-	result = recv(socket, (char*)(&o_header), sizeof(o_header), 0);
-	if (result == SOCKET_ERROR)
-		return false;
+	size_t bytesReceived = 0;
+	while (bytesReceived < numBytes)
+	{
+		int result = recv(
+			socket,
+			(pBuffer + bytesReceived),
+			(numBytes - bytesReceived),
+			0);
+
+		if (result == SOCKET_ERROR)
+		{
+			return false;
+		}
+		bytesReceived += result;
+	}
 
 	return true;
 }
 
+bool ReceiveU32(SOCKET socket, u32& num)
+{
+	bool result = ReceiveAll(socket, (char*)(&num), sizeof(num));
+	if(result)
+	{
+		num = ntohl(num);
+		return true;
+	}
+	else
+	{
+		return false;
+	}
+	
+}
+
+bool ReceiveHeader(SOCKET socket, PacketType& o_header)
+{
+	return ReceiveAll(socket, (char*)(&o_header), sizeof(o_header));
+}
+
 bool ReceiveBuffer(SOCKET socket, std::string& o_buffer)
 {
-	int result;
-	size_t bufferSize;
-	result = recv(socket, (char*)(&bufferSize), sizeof(bufferSize), 0);
-	if (result == SOCKET_ERROR)
+	bool result;
+	u32 bufferSize;
+	result = ReceiveU32(socket, bufferSize);
+	if (!result)
 		return false;
 
 	std::unique_ptr<char[]> pBuffer(new char[bufferSize]);
-	result = recv(socket, pBuffer.get(), bufferSize, 0);
-	if (result == SOCKET_ERROR)
+	result = ReceiveAll(socket, pBuffer.get(), bufferSize);
+	if (!result)
 		return false;
 
 	o_buffer = std::string(pBuffer.get(), bufferSize);
+
 	return true;
 }
 

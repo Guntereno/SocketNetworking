@@ -9,7 +9,7 @@ int main()
 	Net::Init();
 
 	Server server;
-	bool result = server.Listen(1111, true);
+	bool result = server.Listen(1111, false);
 
 	while (true)
 	{}
