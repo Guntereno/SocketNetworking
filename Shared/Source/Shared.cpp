@@ -14,53 +14,77 @@ void Init()
 	}
 }
 
-void SendHeader(SOCKET socket, PacketType packetType)
+bool SendHeader(SOCKET socket, PacketType packetType)
 {
-	send(socket, (const char*)(&packetType), sizeof(packetType), 0);
+	int result;
+	result = send(socket, (const char*)(&packetType), sizeof(packetType), 0);
+	if (result == SOCKET_ERROR)
+		return false;
+
+	return true;
 }
 
-void SendBuffer(SOCKET socket, const char* pBuffer, size_t size)
+bool SendBuffer(SOCKET socket, const char* pBuffer, size_t size)
 {
 	if (size == 0)
-		return;
+		return false;
 
-	send(socket, (const char*)(&size), sizeof(size), 0);
+	int result;
+	result = send(socket, (const char*)(&size), sizeof(size), 0);
+	if (result == SOCKET_ERROR)
+		return false;
+
 	send(socket, pBuffer, size, 0);
+	if (result == SOCKET_ERROR)
+		return false;
+
+	return true;
 }
 
-void SendMessagePacket(SOCKET socket, const char* pBuffer, size_t size)
+bool SendMessagePacket(SOCKET socket, const char* pBuffer, size_t size)
 {
-	SendHeader(socket, PacketType::Message);
-	SendBuffer(socket, pBuffer, size);
+	bool result = SendHeader(socket, PacketType::Message);
+	result = result ? SendBuffer(socket, pBuffer, size) : false;
+	return result;
 }
 
-void SendMessagePacket(SOCKET socket, const std::string& message)
+bool SendMessagePacket(SOCKET socket, const std::string& message)
 {
-	SendHeader(socket, PacketType::Message);
-	SendBuffer(socket, message);
+	bool result = SendHeader(socket, PacketType::Message);
+	result = result ? SendBuffer(socket, message) : false;
+	return result;
 }
 
-void SendBuffer(SOCKET socket, const std::string& message)
+bool SendBuffer(SOCKET socket, const std::string& message)
 {
-	SendBuffer(socket, message.c_str(), message.length());
+	return SendBuffer(socket, message.c_str(), message.length());
 }
 
-PacketType ReceiveHeader(SOCKET socket)
+bool ReceiveHeader(SOCKET socket, PacketType& o_header)
 {
-	PacketType packetType;
-	recv(socket, (char*)(&packetType), sizeof(packetType), 0);
-	return packetType;
+	int result;
+	result = recv(socket, (char*)(&o_header), sizeof(o_header), 0);
+	if (result == SOCKET_ERROR)
+		return false;
+
+	return true;
 }
 
-std::string ReceiveBuffer(SOCKET socket)
+bool ReceiveBuffer(SOCKET socket, std::string& o_buffer)
 {
+	int result;
 	size_t bufferSize;
-	recv(socket, (char*)(&bufferSize), sizeof(bufferSize), 0);
+	result = recv(socket, (char*)(&bufferSize), sizeof(bufferSize), 0);
+	if (result == SOCKET_ERROR)
+		return false;
 
 	std::unique_ptr<char[]> pBuffer(new char[bufferSize]);
-	recv(socket, pBuffer.get(), bufferSize, 0);
+	result = recv(socket, pBuffer.get(), bufferSize, 0);
+	if (result == SOCKET_ERROR)
+		return false;
 
-	return std::string(pBuffer.get(), bufferSize);
+	o_buffer = std::string(pBuffer.get(), bufferSize);
+	return true;
 }
 
 }

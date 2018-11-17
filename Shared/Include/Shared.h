@@ -16,15 +16,15 @@ enum class PacketType : u8
 
 void Init();
 
-void SendHeader(SOCKET socket, PacketType packetType);
-void SendBuffer(SOCKET socket, const char* pBuffer, size_t size);
-void SendBuffer(SOCKET socket, const std::string& message);
+bool SendHeader(SOCKET socket, PacketType packetType);
+bool SendBuffer(SOCKET socket, const char* pBuffer, size_t size);
+bool SendBuffer(SOCKET socket, const std::string& message);
 
-void SendMessagePacket(SOCKET socket, const char* pBuffer, size_t size);
-void SendMessagePacket(SOCKET socket, const std::string& message);
+bool SendMessagePacket(SOCKET socket, const char* pBuffer, size_t size);
+bool SendMessagePacket(SOCKET socket, const std::string& message);
 
-PacketType ReceiveHeader(SOCKET socket);
-std::string ReceiveBuffer(SOCKET socket);
+bool ReceiveHeader(SOCKET socket, PacketType& o_header);
+bool ReceiveBuffer(SOCKET socket, std::string& o_buffer);
 
 }
 
