@@ -120,6 +120,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="Include\Shared.h" />
+    <ClInclude Include="Include\Types.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\Shared.cpp" />

@@ -14,6 +14,11 @@ void Init()
 	}
 }
 
+void SendHeader(SOCKET socket, PacketType packetType)
+{
+	send(socket, (const char*)(&packetType), sizeof(packetType), 0);
+}
+
 void SendBuffer(SOCKET socket, const char* pBuffer, size_t size)
 {
 	if (size == 0)
@@ -23,9 +28,28 @@ void SendBuffer(SOCKET socket, const char* pBuffer, size_t size)
 	send(socket, pBuffer, size, 0);
 }
 
+void SendMessagePacket(SOCKET socket, const char* pBuffer, size_t size)
+{
+	SendHeader(socket, PacketType::Message);
+	SendBuffer(socket, pBuffer, size);
+}
+
+void SendMessagePacket(SOCKET socket, const std::string& message)
+{
+	SendHeader(socket, PacketType::Message);
+	SendBuffer(socket, message);
+}
+
 void SendBuffer(SOCKET socket, const std::string& message)
 {
 	SendBuffer(socket, message.c_str(), message.length());
+}
+
+PacketType ReceiveHeader(SOCKET socket)
+{
+	PacketType packetType;
+	recv(socket, (char*)(&packetType), sizeof(packetType), 0);
+	return packetType;
 }
 
 std::string ReceiveBuffer(SOCKET socket)
