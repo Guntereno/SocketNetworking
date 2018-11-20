@@ -3,7 +3,9 @@
 #include <WinSock2.h>
 
 #include <mutex>
-#include <thread>
+#include <thread> 
+
+#include "Types.h"
 
 class Client
 {
@@ -11,15 +13,16 @@ public:
 	Client();
 	~Client();
 
-	bool Connect(const char* pIpAddress, int port);
+	bool ConnectToLobby(const char* pIpAddress, int port);
 	bool HandleInput(const std::string& input);
 
 private:
 	bool ReceiveMessage();
 	void ServerRecieveThread();
+	bool OpenGameplaySocket(u16& o_port);
 
-	SOCKET m_connection;
-	std::mutex m_outputMutex;
-	std::thread m_recieveThread;
+	SOCKET m_lobbySocket;
+	SOCKET m_gameSocket;
+	std::thread m_receiveThread;
 };
 

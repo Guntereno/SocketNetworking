@@ -1,5 +1,7 @@
 #include "Shared.h"
 
+#include <memory>
+
 namespace Net
 {
 
@@ -16,7 +18,7 @@ void Init()
 
 static bool SendAll(SOCKET socket, const char* pBuffer, size_t numBytes)
 {
-	size_t bytesSent = 0;
+	int bytesSent = 0;
 	while (bytesSent < numBytes)
 	{
 		int result = send(
@@ -47,6 +49,12 @@ bool SendU32(SOCKET socket, u32 num)
 	return SendAll(socket, (const char*)(&num), sizeof(num));
 }
 
+bool SendU16(SOCKET socket, u16 num)
+{
+	num = htons(num);
+	return SendAll(socket, (const char*)(&num), sizeof(num));
+}
+
 bool SendBuffer(SOCKET socket, const char* pBuffer, size_t size)
 {
 	if (size == 0)
@@ -54,7 +62,7 @@ bool SendBuffer(SOCKET socket, const char* pBuffer, size_t size)
 
 	bool result;
 
-	result = SendU32(socket, size);
+	result = SendU32(socket, (u32)size);
 	if (!result)
 		return false;
 
@@ -86,7 +94,7 @@ bool SendBuffer(SOCKET socket, const std::string& message)
 
 static bool ReceiveAll(SOCKET socket, char* pBuffer, size_t numBytes)
 {
-	size_t bytesReceived = 0;
+	int bytesReceived = 0;
 	while (bytesReceived < numBytes)
 	{
 		int result = recv(
@@ -117,7 +125,20 @@ bool ReceiveU32(SOCKET socket, u32& num)
 	{
 		return false;
 	}
-	
+}
+
+bool ReceiveU16(SOCKET socket, u16& num)
+{
+	bool result = ReceiveAll(socket, (char*)(&num), sizeof(num));
+	if (result)
+	{
+		num = ntohs(num);
+		return true;
+	}
+	else
+	{
+		return false;
+	}
 }
 
 bool ReceiveHeader(SOCKET socket, PacketType& o_header)
@@ -141,6 +162,12 @@ bool ReceiveBuffer(SOCKET socket, std::string& o_buffer)
 	o_buffer = std::string(pBuffer.get(), bufferSize);
 
 	return true;
+}
+
+void OutputIp(std::ostream& stream, u32 ip)
+{
+	const u8* pIp = (const u8*)(&ip);
+	stream << +pIp[0] << "." << +pIp[1] << "." << +pIp[2] << "." << +pIp[3];
 }
 
 }

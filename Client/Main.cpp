@@ -5,13 +5,22 @@
 #include "Client.h"
 #include <iostream>
 
-int main()
+int main(int argc, char *argv[])
 {
+	const char* const kDefaultServer = "127.0.0.1";
+	const int kDefaultPort = 1111;
+
+	const char* pServer = kDefaultServer;
+	if (argc > 1)
+	{
+		pServer = argv[1];
+	}
+
 	Net::Init();
 
 	Client client;
 
-	bool result = client.Connect("127.0.0.1", 1111);
+	bool result = client.ConnectToLobby(pServer, kDefaultPort);
 	if (!result)
 	{
 		return 1;
