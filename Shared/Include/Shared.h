@@ -34,10 +34,10 @@ void Init();
 bool SendHeader(SOCKET socket, PacketType packetType);
 bool SendU32(SOCKET socket, u32 num);
 bool SendU16(SOCKET socket, u16 num);
-bool SendBuffer(SOCKET socket, const char* pBuffer, size_t size);
+bool SendBuffer(SOCKET socket, const char* pBuffer, int size);
 bool SendBuffer(SOCKET socket, const std::string& message);
 
-bool SendMessagePacket(SOCKET socket, const char* pBuffer, size_t size);
+bool SendMessagePacket(SOCKET socket, const char* pBuffer, int size);
 bool SendMessagePacket(SOCKET socket, const std::string& message);
 
 bool ReceiveU32(SOCKET socket, u32& num);

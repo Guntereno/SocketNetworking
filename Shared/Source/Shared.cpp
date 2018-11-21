@@ -16,7 +16,7 @@ void Init()
 	}
 }
 
-static bool SendAll(SOCKET socket, const char* pBuffer, size_t numBytes)
+static bool SendAll(SOCKET socket, const char* pBuffer, int numBytes)
 {
 	int bytesSent = 0;
 	while (bytesSent < numBytes)
@@ -55,7 +55,7 @@ bool SendU16(SOCKET socket, u16 num)
 	return SendAll(socket, (const char*)(&num), sizeof(num));
 }
 
-bool SendBuffer(SOCKET socket, const char* pBuffer, size_t size)
+bool SendBuffer(SOCKET socket, const char* pBuffer, int size)
 {
 	if (size == 0)
 		return false;
@@ -73,7 +73,7 @@ bool SendBuffer(SOCKET socket, const char* pBuffer, size_t size)
 	return true;
 }
 
-bool SendMessagePacket(SOCKET socket, const char* pBuffer, size_t size)
+bool SendMessagePacket(SOCKET socket, const char* pBuffer, int size)
 {
 	bool result = SendHeader(socket, PacketType::Message);
 	result = result ? SendBuffer(socket, pBuffer, size) : false;
@@ -89,10 +89,10 @@ bool SendMessagePacket(SOCKET socket, const std::string& message)
 
 bool SendBuffer(SOCKET socket, const std::string& message)
 {
-	return SendBuffer(socket, message.c_str(), message.length());
+	return SendBuffer(socket, message.c_str(), (int)(message.length()));
 }
 
-static bool ReceiveAll(SOCKET socket, char* pBuffer, size_t numBytes)
+static bool ReceiveAll(SOCKET socket, char* pBuffer, int numBytes)
 {
 	int bytesReceived = 0;
 	while (bytesReceived < numBytes)
