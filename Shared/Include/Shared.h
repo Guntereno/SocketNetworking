@@ -23,6 +23,12 @@ enum class PacketType : u8
 	ClientNull
 };
 
+struct ClientEndpoint
+{
+	u32 IpAddress;
+	u16 Port;
+};
+
 void Init();
 
 bool SendHeader(SOCKET socket, PacketType packetType);
