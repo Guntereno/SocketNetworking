@@ -6,6 +6,7 @@
 #include <iostream>
 #include <iomanip>
 #include <mutex>
+#include <fstream>
 
 #define _USE_MATH_DEFINES
 #include <math.h>
@@ -297,7 +298,11 @@ bool GameLoop()
 
 
 int main(int argc, char *argv[])
-{ 
+{
+	// Redirect error messages to a log file
+	std::ofstream errorFile("ErrorFile.log");
+	std::cerr.rdbuf(errorFile.rdbuf());
+
 	const char* const kDefaultServer = "127.0.0.1";
 	const int kDefaultPort = 1111;
 
